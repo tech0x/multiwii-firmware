@@ -28,7 +28,7 @@ void i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t *buf, uint8_t size);
 #if defined(ADXL345)
   #define ACC_1G 265
 #endif
-#if defined(BMA180) || defined(BMA280) || defined(LIS3LV02) || defined(LSM303DLx_ACC) || defined(LSM330)
+#if defined(BMA180) || defined(BMA280) || defined(LIS3LV02) || defined(LSM303DLx_ACC) || defined(LSM330) || defined(LSM6DS3)
   #define ACC_1G 255
 #endif
 #if defined(BMA020)
@@ -37,7 +37,7 @@ void i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t *buf, uint8_t size);
 #if defined(ADCACC)
   #define ACC_1G 75
 #endif
-#if defined(MPU6050)
+#if defined(MPU6050) || defined(MPU9250)
   #if defined(FREEIMUv04)
     #define ACC_1G 255
   #else
@@ -54,13 +54,16 @@ void i2c_read_reg_to_buf(uint8_t add, uint8_t reg, uint8_t *buf, uint8_t size);
 #if defined(ITG3050)
   #define GYRO_SCALE (4 / 16.0 * PI / 180.0 / 1000000.0) //16.4 LSB = 1 deg/s  -- 16.0 apparently gives beter results than 16.4 (empirical)
 #endif
-#if defined(MPU6050) || defined(MPU3050)
+#if defined(MPU6050) || defined(MPU3050) || defined(MPU9250)
   #define GYRO_SCALE (4 / 16.4 * PI / 180.0 / 1000000.0) //16.4 LSB = 1 deg/s
 #endif
 #if defined(ITG3200)
   #define GYRO_SCALE (4 / 14.375 * PI / 180.0 / 1000000.0) //ITG3200   14.375 LSB = 1 deg/s
 #endif
 #if defined(L3G4200D) || defined(LSM330)
+  #define GYRO_SCALE ((4.0f * PI * 70.0f)/(1000.0f * 180.0f * 1000000.0f)) // 70 milli deg/s /digit => 1 deg/s = 1000/70 LSB
+#endif
+#if defined(LSM6DS3)
   #define GYRO_SCALE ((4.0f * PI * 70.0f)/(1000.0f * 180.0f * 1000000.0f)) // 70 milli deg/s /digit => 1 deg/s = 1000/70 LSB
 #endif
 #if defined(WMP)

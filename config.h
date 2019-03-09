@@ -4,7 +4,7 @@
 /*************************************************************************************************/
 /****           CONFIGURABLE PARAMETERS                                                       ****/
 /*************************************************************************************************/
-
+  
 /* this file consists of several sections
  * to create a working combination you must at least make your choices in section 1.
  * 1 - BASIC SETUP - you must select an option in every block.
@@ -36,7 +36,7 @@
     //#define BI
     //#define TRI
     //#define QUADP
-    //#define QUADX
+    #define QUADX
     //#define Y4
     //#define Y6
     //#define HEX6
@@ -59,8 +59,8 @@
     //#define MINTHROTTLE 1300 // for Turnigy Plush ESCs 10A
     //#define MINTHROTTLE 1120 // for Super Simple ESCs 10A
     //#define MINTHROTTLE 1064 // special ESC (simonk)
-    //#define MINTHROTTLE 1050 // for brushed ESCs like ladybird
-    #define MINTHROTTLE 1150 // (*) (**)
+    //#define MINTHROTTLE 1100 // for brushed ESCs like ladybird
+    #define MINTHROTTLE 1100 // (*) (**)
 
   /****************************    Motor maxthrottle    *******************************/
     /* this is the maximum value for the ESCs at full power, this value can be increased up to 2000 */
@@ -168,22 +168,26 @@
       //#define ITG3050
       //#define ITG3200
       //#define MPU3050
-      //#define L3G4200D
-      //#define MPU6050       //combo + ACC
+//      #define L3G4200D
+//      #define MPU6050       //combo + ACC
       //#define LSM330        //combo + ACC
+//       #define LSM6DS3         //combo + ACC
+      #define MPU9250       //combo + ACC + MAG
       
       /* I2C accelerometer */
       //#define MMA7455
-      //#define ADXL345
+//      #define ADXL345
       //#define BMA020
       //#define BMA180
       //#define BMA280
       //#define LIS3LV02
       //#define LSM303DLx_ACC
       //#define MMA8451Q
+      #define ADXL345_ADDRESS 0x53
 
       /* I2C barometer */
       //#define BMP085
+      //#define BMP280
       //#define MS561101BA
 
       /* I2C magnetometer */
@@ -202,9 +206,15 @@
       //#define ADCACC
 
       /* enforce your individual sensor orientation - even overrides board specific defaults */
-      //#define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
-      //#define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] = -Y; imu.gyroADC[PITCH] =  X; imu.gyroADC[YAW] = Z;}
-      //#define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  Y; imu.magADC[YAW]  = Z;}
+      #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  = X; imu.accADC[PITCH]  = Y; imu.accADC[YAW]  = -Z;}
+      #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] = X; imu.gyroADC[PITCH] = Y; imu.gyroADC[YAW] = -Z;}
+
+      //LSM6D
+//      #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  = -Y; imu.accADC[PITCH]  = X; imu.accADC[YAW]  = -Z;}
+//      #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] = -Y; imu.gyroADC[PITCH] = X; imu.gyroADC[YAW] = -Z;}
+
+
+//      #define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  = X; imu.magADC[PITCH]  = Y; imu.magADC[YAW]  = -Z;}
 
       /* Board orientation shift */
       /* If you have frame designed only for + mode and you cannot rotate FC phisycally for flying in X mode (or vice versa)
@@ -230,7 +240,7 @@
     #define YAW_DIRECTION 1
     //#define YAW_DIRECTION -1 // if you want to reverse the yaw correction direction
 
-    #define ONLYARMWHENFLAT //prevent the copter from arming when the copter is tilted
+    //#define ONLYARMWHENFLAT //prevent the copter from arming when the copter is tilted
 
    /********************************    ARM/DISARM    *********************************/
    /* optionally disable stick combinations to arm/disarm the motors.
@@ -320,6 +330,7 @@
      * howto: http://www.multiwii.com/wiki/index.php?title=Config.h#Individual_Mixing
      */
     //#define MY_PRIVATE_MIXING "filename.h"
+    
 
   /***********************      your individual defaults     ***********************/
     /* if you want to replace the hardcoded default values with your own (e.g. from a previous save to an .mwi file),
@@ -361,23 +372,25 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
     /****************************    PPM Sum Reciver    ***********************************/
       /* The following lines apply only for specific receiver with only one PPM sum signal, on digital PIN 2
          Select the right line depending on your radio brand. Feel free to modify the order in your PPM order is different */
-      //#define SERIAL_SUM_PPM         PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For Graupner/Spektrum
+      //#define SERIAL_SUM_PPM           PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For Graupner/Spektrum
       //#define SERIAL_SUM_PPM         ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For Robe/Hitec/Futaba
       //#define SERIAL_SUM_PPM         ROLL,PITCH,YAW,THROTTLE,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For Multiplex
       //#define SERIAL_SUM_PPM         PITCH,ROLL,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For some Hitec/Sanwa/Others
-      //#define SERIAL_SUM_PPM         THROTTLE,YAW,ROLL,PITCH,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //Modelcraft
+      #define SERIAL_SUM_PPM         PITCH,THROTTLE,ROLL,YAW,AUX1,AUX2,AUX3,AUX4 
+      //#define SERIAL_SUM_PPM         PITCH,THROTTLE,YAW,ROLL,AUX1,AUX2,AUX3,AUX4 //Modelcraft
 
       // Uncommenting following line allow to connect PPM_SUM receiver to standard THROTTLE PIN on MEGA boards (eg. A8 in CRIUS AIO)
-      //#define PPM_ON_THROTTLE
+      #define PPM_ON_THROTTLE
 
     /**********************    Spektrum Satellite Reciver    *******************************/
       /* The following lines apply only for Spektrum Satellite Receiver
          Spektrum Satellites are 3V devices.  DO NOT connect to 5V!
          For MEGA boards, attach sat grey wire to RX1, pin 19. Sat black wire to ground. Sat orange wire to Mega board's 3.3V (or any other 3V to 3.3V source).
-         For PROMINI, attach sat grey to RX0.  Attach sat black to ground. */
+        2 For PROMINI, attach sat grey to RX0.  Attach sat black to ground. */
       //#define SPEKTRUM 1024
       //#define SPEKTRUM 2048
-      //#define RX_SERIAL_PORT 1    // Forced to 0 on Pro Mini and single serial boards; Set to your choice of 0, 1, or 2 on any Mega based board (defaults to 1 on Mega).
+      
+      #define RX_SERIAL_PORT 2    // Forced to 0 on Pro Mini and single serial boards; Set to your choice of 0, 1, or 2 on any Mega based board (defaults to 1 on Mega).
       //**************************
       // Defines that allow a "Bind" of a Spektrum or Compatible Remote Receiver (aka Satellite) via Configuration GUI.
       //   Bind mode will be same as declared above, if your TX is capable.
@@ -397,11 +410,11 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
       //#define SBUS     PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,AUX3,AUX4,8,9,10,11,12,13,14,15,16,17  // dsm2 orangerx
       //#define SBUS     ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4,8,9,10,11,12,13,14,15,16,17  // T14SG
       //#define RX_SERIAL_PORT 1
-      #define SBUS_MID_OFFSET 988 //SBUS Mid-Point at 1500
+      //#define SBUS_MID_OFFSET 988 //SBUS Mid-Point at 1500
 
     /******************************* HOTT RECIVER ************************************/
     /* Graupner Hott HD */
-    //#define SUMD PITCH,YAW,THROTTLE,ROLL,AUX1,AUX2,AUX3,AUX4
+      //#define SUMD PITCH,THROTTLE,ROLL,YAW,AUX1,AUX2,AUX3,AUX4
     //#define RX_SERIAL_PORT 1
 
 /*************************************************************************************************/
@@ -500,6 +513,7 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
   /******                Serial com speed    *********************************/
     /* This is the speed of the serial interfaces */
     #define SERIAL0_COM_SPEED 115200
+    //#define SERIAL0_COM_SPEED 57600
     #define SERIAL1_COM_SPEED 115200
     #define SERIAL2_COM_SPEED 115200
     #define SERIAL3_COM_SPEED 115200
@@ -521,7 +535,7 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
          available for ITG3050, ITG3200, MPU3050, MPU6050*/
       //#define GYRO_LPF_256HZ     // This is the default setting, no need to uncomment, just for reference
       //#define GYRO_LPF_188HZ
-      //#define GYRO_LPF_98HZ
+      #define GYRO_LPF_98HZ
       //#define GYRO_LPF_42HZ
       //#define GYRO_LPF_20HZ
       //#define GYRO_LPF_10HZ
@@ -534,8 +548,8 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
       //#define GYRO_SMOOTHING {20, 20, 3}    // (*) separate averaging ranges for roll, pitch, yaw
 
     /************************    Moving Average Gyros    **********************************/
-      //#define MMGYRO 10                      // (*) Active Moving Average Function for Gyros
-      //#define MMGYROVECTORLENGTH 15          // Length of Moving Average Vector (maximum value for tunable MMGYRO
+      #define MMGYRO 10                      // (*) Active Moving Average Function for Gyros
+      #define MMGYROVECTORLENGTH 15          // Length of Moving Average Vector (maximum value for tunable MMGYRO
       /* Moving Average ServoGimbal Signal Output */
       //#define MMSERVOGIMBAL                  // Active Output Moving Average Function for Servos Gimbal
       //#define MMSERVOGIMBALVECTORLENGHT 32   // Lenght of Moving Average Vector
@@ -702,7 +716,7 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
       - No GPS FIX -> LED blink at speed of incoming GPS frames
       - Fix and sat no. bellow 5 -> LED off
       - Fix and sat no. >= 5 -> LED blinks, one blink for 5 sat, two blinks for 6 sat, three for 7 ... */
-    #define GPS_LED_INDICATOR
+    //#define GPS_LED_INDICATOR
 
    //Enables the MSP_WP command set , which is used by WinGUI for displaying an setting up navigation
    //#define USE_MSP_WP
@@ -794,7 +808,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
       //#define OLED_DIGOLE     // I2C OLED from http://www.digole.com/index.php?productID=550
 
     /******************************   Display settings   ***********************************/
-      #define LCD_SERIAL_PORT 0    // must be 0 on Pro Mini and single serial boards; Set to your choice on any Mega based board
+      //#define LCD_SERIAL_PORT 0    // must be 0 on Pro Mini and single serial boards; Set to your choice on any Mega based board
 
       //#define SUPPRESS_OLED_I2C_128x64LOGO  // suppress display of OLED logo to save memory
 
@@ -873,8 +887,8 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
   /********************************************************************/
   /****                             RSSI                           ****/
   /********************************************************************/
-    //#define RX_RSSI
-    //#define RX_RSSI_PIN A3
+    #define RX_RSSI
+    #define RX_RSSI_PIN A3
     //#define RX_RSSI_CHAN 8   //RSSI injection on selected channel (for PPM, Olrs, SBUS, etc.) (Starts at 0)
 
   /********************************************************************/
@@ -887,22 +901,22 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     //#define SPORT_TELEMETRY           // for FRSKY twoway receivers with S.PORT telemetry (S-series like X4R/X6R/X8R), not implemented yet - TO BE DONE
 
     // FRSKY common entries - valid for both protocols
-    #define TELEMETRY_SERIAL 3        // change if required
+    //#define TELEMETRY_SERIAL 3        // change if required
 
     // FRSKY standard telemetry specific devices
-    #define FRSKY_FLD02               // send only data specific for the FRSKY display FLD-02
+    //#define FRSKY_FLD02               // send only data specific for the FRSKY display FLD-02
     //#define OPENTX                    // send OpenTX specific data
 
     // FRSKY standard telemetry specific selections
     //#define COORDFORMAT_DECIMALMINUTES // uncomment to get the format DD°MM.mmmm for the coordinates - comment out to get the format DD.dddddd° for the coordinates 
     //#define KILOMETER_HOUR            // send speed in kilometers per hour instead of knots (default) - requested by OPENTX
-    #define TELEMETRY_ALT_BARO        // send BARO based altitude, calibrated to 0 when arming, recommended if BARO available
+    //#define TELEMETRY_ALT_BARO        // send BARO based altitude, calibrated to 0 when arming, recommended if BARO available
     //#define TELEMETRY_ALT_GPS         // send GPS based altitude (altitude above see level), for FLD-02 don't use together with TELEMETRY_ALT_BARO
-    #define TELEMETRY_COURSE_MAG      // send MAG based course/heading, recommended if MAG available, but FLD-02 does not display
+    //#define TELEMETRY_COURSE_MAG      // send MAG based course/heading, recommended if MAG available, but FLD-02 does not display
     //#define TELEMETRY_COURSE_GPS      // send GPS based course/heading, don't use together with TELEMETRY_COURSE_MAG, FLD-02 does not display
 
     // S.PORT specific entries
-    #define FRSKY_SPORT_A2_MAX 124    // A2 voltage is represented by a value in the range 0-255. A value of 16 results in 1.6V, 124 is 12.4V, etc
+    //#define FRSKY_SPORT_A2_MAX 124    // A2 voltage is represented by a value in the range 0-255. A value of 16 results in 1.6V, 124 is 12.4V, etc
 
   /********************************************************************/
   /****                             Buzzer                         ****/
@@ -923,20 +937,20 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     //#define VBAT              // uncomment this line to activate the vbat code
     #define VBATSCALE       131 // (*) (**) change this value if readed Battery voltage is different than real voltage
     #define VBATNOMINAL     126 // 12,6V full battery nominal voltage - only used for lcd.telemetry
-    #define VBATLEVEL_WARN1 107 // (*) (**) 10,7V
-    #define VBATLEVEL_WARN2  99 // (*) (**) 9.9V
-    #define VBATLEVEL_CRIT   93 // (*) (**) 9.3V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
-    #define NO_VBAT          16 // Avoid beeping without any battery
-    #define VBAT_OFFSET       0 // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
+    //#define VBATLEVEL_WARN1 107 // (*) (**) 10,7V
+    //#define VBATLEVEL_WARN2  99 // (*) (**) 9.9V
+    //#define VBATLEVEL_CRIT   93 // (*) (**) 9.3V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
+    //#define NO_VBAT          16 // Avoid beeping without any battery
+    //#define VBAT_OFFSET       0 // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
 
     /* for V BAT monitoring of individual cells
      * enable both VBAT and VBAT_CELLS
      */
-    //#define VBAT_CELLS
+    #define VBAT_CELLS
     #define VBAT_CELLS_NUM 0 // set this to the number of cells you monitor via analog pins
-    #define VBAT_CELLS_PINS {A0, A1, A2, A3, A4, A5 } // set this to the sequence of analog pins
-    #define VBAT_CELLS_OFFSETS {0, 50, 83, 121, 149, 177 } // in 0.1 volts, gets added to voltage value  - useful for zener diodes
-    #define VBAT_CELLS_DIVS { 75, 122,  98, 18, 30, 37 } // divisor for proportional part according to resistors - larger value here gives smaller voltage
+    //#define VBAT_CELLS_PINS {A0, A1, A2, A3, A4, A5 } // set this to the sequence of analog pins
+    //#define VBAT_CELLS_OFFSETS {0, 50, 83, 121, 149, 177 } // in 0.1 volts, gets added to voltage value  - useful for zener diodes
+    //#define VBAT_CELLS_DIVS { 75, 122,  98, 18, 30, 37 } // divisor for proportional part according to resistors - larger value here gives smaller voltage
 
   /********************************************************************/
   /****           powermeter (battery capacity monitoring)         ****/
@@ -950,9 +964,10 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
        2 - soft: - (good results +-5% for plush and mystery ESCs @ 2S and 3S, not good with SuperSimple ESC)    */
     //#define POWERMETER_SOFT
     //#define POWERMETER_HARD
-    #define PSENSORNULL 510 /* (*) hard only: set to analogRead() value for zero current; for I=0A my sensor
-                                   gives 1/2 Vss; that is approx 2.49Volt; */
-    #define PINT2mA 132     /* (*) hard: one integer step on arduino analog translates to mA (example 4.9 / 37 * 1000) ;
+    //#define PSENSORNULL 510 
+    /* (*) hard only: set to analogRead() value for zero current; for I=0A my sensor gives 1/2 Vss; that is approx 2.49Volt; */
+    //#define PINT2mA 132     
+    /* (*) hard: one integer step on arduino analog translates to mA (example 4.9 / 37 * 1000) ;
                                    soft: use fictional value, start with 100.
                                    for hard and soft: larger PINT2mA will get you larger value for power (mAh equivalent) */
     //#define WATTS // compute and display the actual watts (=Volt*Ampere) consumed - requires both POWERMETER_HARD and VBAT
@@ -964,7 +979,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     /* defines the neutral zone of throttle stick during altitude hold, default setting is
        +/-50 uncommend and change the value below if you want to change it. */
     #define ALT_HOLD_THROTTLE_NEUTRAL_ZONE    50
-    //#define ALT_HOLD_THROTTLE_MIDPOINT        1500  // in us    - if uncommented, this value is used in ALT_HOLD for throttle stick middle point instead of initialThrottleHold parameter.
+    #define ALT_HOLD_THROTTLE_MIDPOINT        1500  // in us    - if uncommented, this value is used in ALT_HOLD for throttle stick middle point instead of initialThrottleHold parameter.
 
 
     /* uncomment to disable the altitude hold feature.
@@ -1020,7 +1035,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
-  #define VBAT_PRESCALER 16 // set this to 8 if vbatscale would exceed 255
+  //#define VBAT_PRESCALER 16 // set this to 8 if vbatscale would exceed 255
 
   /**************************************************************************************/
   /********   special ESC with extended range [0-2000] microseconds  ********************/
@@ -1053,7 +1068,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 
   /***********************         Servo Refreshrates            ***********************/
     /* Default 50Hz Servo refresh rate*/
-    #define SERVO_RFR_50HZ
+    //#define SERVO_RFR_50HZ
 
     /* up to 160Hz servo refreshrate .. works with the most analog servos*/
     //#define SERVO_RFR_160HZ
@@ -1074,7 +1089,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
       SERVO7  = pin 7   (elevator for fixed wing)
       SERVO8  = pin 8   (motor for fixed wing)       */ 
 
-    #define MEGA_HW_PWM_SERVOS
+    //#define MEGA_HW_PWM_SERVOS
  
     /* HW PWM Servo outputs for 32u4 NanoWii, MicroWii etc. - works with either the variable SERVO_RFR_RATE or
      * one of the 3 fixed servo.refresh.rates *
@@ -1087,7 +1102,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
      */
     //#define A32U4_4_HW_PWM_SERVOS
 
-    #define SERVO_RFR_RATE  50    // In Hz, you can set it from 20 to 400Hz, used only in HW PWM mode for mega and 32u4
+    //#define SERVO_RFR_RATE  50    // In Hz, you can set it from 20 to 400Hz, used only in HW PWM mode for mega and 32u4
     //#define SERVO_PIN5_RFR_RATE  200    // separate yaw pwm rate.
                                           // In Hz, you can set it from 20 to 400Hz, used only in HW PWM mode for 32u4
 
@@ -1170,8 +1185,8 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
        Warning: this creates a special version of MultiWii Code
        You cannot fly with this special version. It is only to be used for calibrating ESCs
        Read How To at http://code.google.com/p/multiwii/wiki/ESCsCalibration */
-    #define ESC_CALIB_LOW  MINCOMMAND
-    #define ESC_CALIB_HIGH 2000
+    #define ESC_CALIB_LOW 1000
+    #define ESC_CALIB_HIGH 2200
     //#define ESC_CALIB_CANNOT_FLY  // uncomment to activate
 
   /****           internal frequencies                             ****/
@@ -1179,8 +1194,10 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
        time base is main loop cycle time - a value of 6 means to trigger the action every 6th run through the main loop
        example: with cycle time of approx 3ms, do action every 6*3ms=18ms
        value must be [1; 65535] */
+ /*
     #define LCD_TELEMETRY_FREQ 23       // to send telemetry data over serial 23 <=> 60ms <=> 16Hz (only sending interlaced, so 8Hz update rate)
     #define LCD_TELEMETRY_AUTO_FREQ  967// to step to next telemetry page 967 <=> 3s
+*/
     #define PSENSOR_SMOOTH 16           // len of averaging vector for smoothing the PSENSOR readings; should be power of 2; set to 1 to disable
     #define VBAT_SMOOTH 16              // len of averaging vector for smoothing the VBAT readings; should be power of 2; set to 1 to disable
     #define RSSI_SMOOTH 16              // len of averaging vector for smoothing the RSSI readings; should be power of 2; set to 1 to disable

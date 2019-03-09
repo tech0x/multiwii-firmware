@@ -471,6 +471,195 @@ uint8_t Baro_update() {                   // first UT conversion is started in i
 }
 #endif
 
+#if defined(BMP280)
+
+#define BME280_DIG_T1_LSB_REG			0x88
+#define BME280_DIG_T1_MSB_REG			0x89
+#define BME280_DIG_T2_LSB_REG			0x8A
+#define BME280_DIG_T2_MSB_REG			0x8B
+#define BME280_DIG_T3_LSB_REG			0x8C
+#define BME280_DIG_T3_MSB_REG			0x8D
+#define BME280_DIG_P1_LSB_REG			0x8E
+#define BME280_DIG_P1_MSB_REG			0x8F
+#define BME280_DIG_P2_LSB_REG			0x90
+#define BME280_DIG_P2_MSB_REG			0x91
+#define BME280_DIG_P3_LSB_REG			0x92
+#define BME280_DIG_P3_MSB_REG			0x93
+#define BME280_DIG_P4_LSB_REG			0x94
+#define BME280_DIG_P4_MSB_REG			0x95
+#define BME280_DIG_P5_LSB_REG			0x96
+#define BME280_DIG_P5_MSB_REG			0x97
+#define BME280_DIG_P6_LSB_REG			0x98
+#define BME280_DIG_P6_MSB_REG			0x99
+#define BME280_DIG_P7_LSB_REG			0x9A
+#define BME280_DIG_P7_MSB_REG			0x9B
+#define BME280_DIG_P8_LSB_REG			0x9C
+#define BME280_DIG_P8_MSB_REG			0x9D
+#define BME280_DIG_P9_LSB_REG			0x9E
+#define BME280_DIG_P9_MSB_REG			0x9F
+
+#define BME280_CTRL_MEAS_REG			0xF4 //Ctrl Measure Reg
+#define BME280_CONFIG_REG				0xF5 //Configuration Reg
+#define BME280_PRESSURE_MSB_REG			0xF7 //Pressure MSB
+#define BME280_PRESSURE_LSB_REG			0xF8 //Pressure LSB
+#define BME280_PRESSURE_XLSB_REG		0xF9 //Pressure XLSB
+#define BME280_TEMPERATURE_MSB_REG		0xFA //Temperature MSB
+#define BME280_TEMPERATURE_LSB_REG		0xFB //Temperature LSB
+#define BME280_TEMPERATURE_XLSB_REG		0xFC //Temperature XLSB
+#define BME280_HUMIDITY_MSB_REG			0xFD //Humidity MSB
+#define BME280_HUMIDITY_LSB_REG			0xFE //Humidity LSB
+
+#define BMP280_ADDRESS 0x76
+//static int32_t pressure;
+int32_t t_fine;
+
+static struct {
+  // sensor registers from the BOSCH BMP280 datasheet
+  int16_t  t2, t3, p2, p3, p4, p5, p6, p7, p8, p9;
+  uint16_t t1, p1;
+  union {uint16_t val; uint8_t raw[2]; } ut; //uncompensated T
+  union {uint32_t val; uint8_t raw[4]; } up; //uncompensated P
+  uint8_t  state;
+  uint32_t deadline;
+} bmp280_ctx;  
+
+void i2c_BMP280_readCalibration(){
+    delay(10);
+    bmp280_ctx.t1 = ((uint16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_T1_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_T1_LSB_REG)));
+    bmp280_ctx.t2 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_T2_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_T2_LSB_REG)));
+    bmp280_ctx.t3 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_T3_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_T3_LSB_REG)));
+
+    bmp280_ctx.p1 = ((uint16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P1_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P1_LSB_REG)));
+    bmp280_ctx.p2 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P2_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P2_LSB_REG)));
+    bmp280_ctx.p3 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P3_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P3_LSB_REG)));
+    bmp280_ctx.p4 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P4_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P4_LSB_REG)));
+    bmp280_ctx.p5 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P5_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P5_LSB_REG)));
+    bmp280_ctx.p6 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P6_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P6_LSB_REG)));
+    bmp280_ctx.p7 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P7_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P7_LSB_REG)));
+    bmp280_ctx.p8 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P8_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P8_LSB_REG)));
+    bmp280_ctx.p9 = ((int16_t)((i2c_readReg(BMP280_ADDRESS,BME280_DIG_P9_MSB_REG) << 8) + i2c_readReg(BMP280_ADDRESS,BME280_DIG_P9_LSB_REG)));
+}
+
+// read a 16 bit register
+int16_t i2c_BMP280_readIntRegister(uint8_t r) {
+  union {int16_t val; uint8_t raw[2]; } data;
+  i2c_rep_start(BMP280_ADDRESS + 0);
+  i2c_write(r);
+  i2c_rep_start(BMP280_ADDRESS + 1);//I2C read direction => 1
+  data.raw[1] = i2c_readAck();
+  data.raw[0] = i2c_readNak();
+  return data.val;
+}
+
+float i2c_BMP280_Calculate() {
+  int32_t adc_P = ((uint32_t)i2c_readReg(BMP280_ADDRESS,BME280_PRESSURE_MSB_REG) << 12) | ((uint32_t)i2c_readReg(BMP280_ADDRESS,BME280_PRESSURE_LSB_REG) << 4) | ((i2c_readReg(BMP280_ADDRESS,BME280_PRESSURE_XLSB_REG) >> 4) & 0x0F);
+  
+  int64_t var1, var2, p_acc;
+  var1 = ((int64_t)t_fine) - 128000;
+  var2 = var1 * var1 * (int64_t)bmp280_ctx.p6;
+  var2 = var2 + ((var1 * (int64_t)bmp280_ctx.p5)<<17);
+  var2 = var2 + (((int64_t)bmp280_ctx.p4)<<35);
+  var1 = ((var1 * var1 * (int64_t)bmp280_ctx.p3)>>8) + ((var1 * (int64_t)bmp280_ctx.p2)<<12);
+  var1 = (((((int64_t)1)<<47)+var1))*((int64_t)bmp280_ctx.p1)>>33;
+  if (var1 == 0) { return 0; }
+ 
+  p_acc = 1048576 - adc_P;
+  p_acc = (((p_acc<<31) - var2)*3125)/var1;
+  var1 = (((int64_t)bmp280_ctx.p9) * (p_acc>>13) * (p_acc>>13)) >> 25;
+  var2 = (((int64_t)bmp280_ctx.p8) * p_acc) >> 19;
+  p_acc = ((p_acc + var1 + var2) >> 8) + (((int64_t)bmp280_ctx.p7)<<4);
+
+  if(p_acc > 0){
+    baroPressure =  (float)p_acc / 256.0;
+    //debug[0] = baroPressure;
+  }
+  return baroPressure;
+}
+
+void i2c_BMP280_UT_Start() { }
+
+void i2c_BMP280_UT_Read() { 
+  int32_t adc_T = ((uint32_t)i2c_readReg(BMP280_ADDRESS,BME280_TEMPERATURE_MSB_REG) << 12) | ((uint32_t)i2c_readReg(BMP280_ADDRESS,BME280_TEMPERATURE_LSB_REG) << 4) | ((i2c_readReg(BMP280_ADDRESS,BME280_TEMPERATURE_XLSB_REG) >> 4) & 0x0F);
+  int64_t var1, var2;
+
+  var1 = ((((adc_T>>3) - ((int32_t)bmp280_ctx.t1<<1))) * ((int32_t)bmp280_ctx.t2)) >> 11;
+  var2 = (((((adc_T>>4) - ((int32_t)bmp280_ctx.t1)) * ((adc_T>>4) - ((int32_t)bmp280_ctx.t1))) >> 12) * ((int32_t)bmp280_ctx.t3)) >> 14;
+  t_fine = var1 + var2;
+
+  //if(t_fine > 0){
+    float output = (t_fine * 5 + 128) >> 8;
+    baroTemperature = output;
+    debug[1] = baroTemperature;
+  //}
+  
+  //readRegister(0xD0);
+  i2c_readReg(BMP280_ADDRESS,0xD0);
+}
+
+void i2c_BMP280_UP_Start () { }
+
+void i2c_BMP280_UP_Read () {
+  float heightOutput = 0;
+
+  heightOutput = ((float)-45846.2)*(pow(((float)i2c_BMP280_Calculate()/(float)101325), 0.190263) - (float)1);
+  debug[2] = heightOutput;
+  //BaroAlt = heightOutput;
+}
+
+void Baro_init() {
+  i2c_BMP280_readCalibration();
+
+  uint8_t dataToWrite = 0;
+
+  i2c_writeReg(BMP280_ADDRESS,BME280_CTRL_MEAS_REG,0x00);
+
+  dataToWrite = (2 << 0x5) & 0xE0; //tStandby 
+  dataToWrite |= (2 << 0x02) & 0x1C; //filter
+  i2c_writeReg(BMP280_ADDRESS,BME280_CONFIG_REG,dataToWrite);
+
+  dataToWrite = (1 << 0x5) & 0xE0; //tempOverSample
+  dataToWrite |= (5 << 0x02) & 0x1C; //pressOverSample 
+  dataToWrite |= (3) & 0x03; //runMode
+  i2c_writeReg(BMP280_ADDRESS,BME280_CTRL_MEAS_REG,dataToWrite);
+
+  //readRegister(0xD0);
+  i2c_readReg(BMP280_ADDRESS,0xD0);
+
+  i2c_BMP280_UT_Read(); 
+  i2c_BMP280_UP_Read();
+}
+
+uint8_t Baro_update() {
+  if (currentTime < bmp280_ctx.deadline) return; 
+  bmp280_ctx.deadline = currentTime;
+  TWBR = ((16000000L / 400000L) - 16) / 2; // change the I2C clock rate to 400kHz, BMP280 is ok with this speed
+  switch (bmp280_ctx.state) {
+    case 0:
+      i2c_BMP280_UT_Start();
+      bmp280_ctx.state++; bmp280_ctx.deadline += 4600;
+      break;
+    case 1:
+      i2c_BMP280_UT_Read();
+      bmp280_ctx.state++;
+      break;
+    case 2: 
+      i2c_BMP280_UP_Start(); 
+      bmp280_ctx.state++; bmp280_ctx.deadline += 14000; 
+      break;
+    case 3: 
+      i2c_BMP280_UP_Read(); 
+      //i2c_BMP280_Calculate(); 
+      //BaroAlt = (1.0f - pow(baroPressure/101325.0f, 0.190295f)) * 4433000.0f; //centimeter
+      debug[3] = ((1.0f - pow(baroPressure/101325.0f, 0.190295f)) * 4433000.0f)/100; //centimeter
+      bmp280_ctx.state = 0; bmp280_ctx.deadline += 5000; 
+      Baro_Common();
+      break;
+  }
+  return 0; 
+}
+#endif
+
+
 // ************************************************************************************************************
 // I2C Barometer MS561101BA
 // ************************************************************************************************************
@@ -828,6 +1017,45 @@ void ACC_init () {
 #endif
 
 // ************************************************************************************************************
+// I2C Accelerometer/Gyroscope LSM6DS3
+// ************************************************************************************************************
+#if defined(LSM6DS3)
+void ACC_init () {
+  delay(10);
+  //i2c_writeReg(0x6B,0x10,0x27);
+  //i2c_writeReg(0x6B,0x11,0x30);
+  //i2c_writeReg(0x6B,0x12,0x04);
+  i2c_writeReg(0x6B,0x10,0x80);
+  i2c_writeReg(0x6B,0x11,0x80);
+  i2c_writeReg(0x6B,0x12,0x04);
+}
+
+void ACC_getADC () {
+  //TWBR = ((F_CPU / 400000L) - 16) / 2;
+  i2c_getSixRawADC(0x6B,0x28);
+
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])/16 ,
+                   ((rawADC[3]<<8) | rawADC[2])/16 ,
+                   ((rawADC[5]<<8) | rawADC[4])/16 );
+  ACC_Common();
+}
+
+void Gyro_init() {
+  i2c_writeReg(0x6B ,0x22 ,0x8F );
+}
+
+void Gyro_getADC () {
+  //TWBR = ((F_CPU / 400000L) - 16) / 2;
+  i2c_getSixRawADC(0x6B,0x22);
+
+  GYRO_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])/20  ,
+                    ((rawADC[3]<<8) | rawADC[2])/20  ,
+                    ((rawADC[5]<<8) | rawADC[4])/20  );
+  GYRO_Common();
+}
+#endif
+
+// ************************************************************************************************************
 // ADC ACC
 // ************************************************************************************************************
 #if defined(ADCACC)
@@ -980,7 +1208,7 @@ void Mag_init() {
   delay(100);
 }
 
-#if !defined(MPU6050_I2C_AUX_MASTER)
+#if !defined(MPU6050_I2C_AUX_MASTER || MPU9250)
   void Device_Mag_getADC() {
     i2c_getSixRawADC(MAG_ADDRESS,MAG_DATA_REGISTER);
     MAG_ORIENTATION( ((rawADC[0]<<8) | rawADC[1]) ,          
@@ -1063,7 +1291,7 @@ static void Mag_init() {
   delay(100);
 }
 
-#if !defined(MPU6050_I2C_AUX_MASTER)
+#if !defined(MPU6050_I2C_AUX_MASTER || MPU9250)
 static void Device_Mag_getADC() {
   getADC();
 }
@@ -1302,6 +1530,77 @@ void Gyro_getADC () {
 // ************************************************************************************************************
 // End Of I2C Gyroscope and Accelerometer LSM330
 // ************************************************************************************************************
+
+
+// ************************************************************************************************************
+// I2C Gyroscope/Accelerometer/Compass MPU9250
+// ************************************************************************************************************
+#if defined(MPU9250)                                                                                      
+      
+#if !defined(MPU9250_ADDRESS)
+  #define MPU9250_ADDRESS     0x68 // address pin AD0 low (GND), default for FreeIMU v0.4 and InvenSense evaluation board
+  //#define MPU9250_ADDRESS     0x69 // address pin AD0 high (VCC)
+  //The MAG acquisition
+  #define MAG_ADDRESS 0x0C
+  #define MAG_DATA_REGISTER 0x03                                  
+#endif                                                                                                                                                                                 
+                             
+//Gyro start
+
+void Gyro_init() {                                                                                                       
+  TWBR = ((F_CPU / 400000L) - 16) / 2; // change the I2C clock rate to 400kHz                                            
+  i2c_writeReg(MPU9250_ADDRESS, 0x6B, 0x80);             //PWR_MGMT_1    -- DEVICE_RESET 1                               
+  delay(5);                                                                                                              
+  i2c_writeReg(MPU9250_ADDRESS, 0x6B, 0x03);             //PWR_MGMT_1    -- SLEEP 0; CYCLE 0; TEMP_DIS 0; CLKSEL 3 (PLL with Z Gyro reference)
+  i2c_writeReg(MPU9250_ADDRESS, 0x1A, GYRO_DLPF_CFG); //CONFIG        -- EXT_SYNC_SET 0 (disable input pin for data sync) ; default DLPF_CFG = 0 => ACC bandwidth = 260Hz  GYRO bandwidth = 256Hz)
+  i2c_writeReg(MPU9250_ADDRESS, 0x1B, 0x18);             //GYRO_CONFIG   -- FS_SEL = 3: Full scale set to 2000 deg/sec                                                                            
+  // enable I2C bypass for AUX I2C, allways on because we have a magnetometer on board                                                                                                            
+  i2c_writeReg(MPU9250_ADDRESS, 0x37, 0x02);           //INT_PIN_CFG   -- INT_LEVEL=0 ; INT_OPEN=0 ; LATCH_INT_EN=0 ; INT_RD_CLEAR=0 ; FSYNC_INT_LEVEL=0 ; FSYNC_INT_EN=0 ; I2C_BYPASS_EN=1 ; CLKOUT_EN=0
+}                                                                                                                                                                                                        
+                                                                                                                                                                                                         
+void Gyro_getADC () {                                                                                                                                                                                    
+  i2c_getSixRawADC(MPU9250_ADDRESS, 0x43);                                                                                                                                                               
+  GYRO_ORIENTATION( ((rawADC[0]<<8) | rawADC[1])/4 , // range: +/- 8192; +/- 2000 deg/sec                                                                                                                
+             ((rawADC[2]<<8) | rawADC[3])/4 ,                                                                                                                                                            
+             ((rawADC[4]<<8) | rawADC[5])/4 );                                                                                                                                                           
+  GYRO_Common();                                                                                                                                                                                         
+}                                                                                                                                                                                                        
+//Gyro end
+                                                                                                                                                                                                         
+//ACC start
+void ACC_init () {                                                                                                                                                                                       
+  i2c_writeReg(MPU9250_ADDRESS, 0x1C, 0x10);                                                                                                                                                             
+}                                                                                                                                                                                                        
+                                                                                                                                                                                                         
+void ACC_getADC () {                                                                                                                                                                                     
+  i2c_getSixRawADC(MPU9250_ADDRESS, 0x3B);                                                                                                                                                               
+  ACC_ORIENTATION( ((rawADC[0]<<8) | rawADC[1])/8 ,                                                                                                                                                      
+                   ((rawADC[2]<<8) | rawADC[3])/8 ,                                                                                                                                                      
+                   ((rawADC[4]<<8) | rawADC[5])/8 );                                                                                                                                                     
+  ACC_Common();                                                                                                                                                                                          
+}                                                                                                                                                                                                        
+//ACC end
+
+//MAG start
+void Mag_init() {                                                                                                                                                                                        
+    delay(100);                                                                                                                                                                                          
+    i2c_writeReg(MAG_ADDRESS,0x0a,0x01);  //Start the first conversion                                                                                                                                   
+    delay(100);                                                                                                                                                                                          
+}                                                                                                                                                                                                        
+    void Device_Mag_getADC() {                                                                                                                                                                           
+     i2c_getSixRawADC(MAG_ADDRESS, 0x03);                                                                                                                                                                
+ MAG_ORIENTATION( ((rawADC[1]<<8) | rawADC[0]) ,                                                                                                                                                         
+                     ((rawADC[3]<<8) | rawADC[2]) ,                                                                                                                                                      
+                     ((rawADC[5]<<8) | rawADC[4]) );                                                                                                                                                     
+ //Start another meassurement                                                                                                                                                                            
+    i2c_writeReg(MAG_ADDRESS,0x0a,0x01);                                                                                                                                                                 
+}                                                                                                                                                                                                        
+//MAG end
+                                                                                                                                                                                                         
+#endif                                                                                                                                                                                                   
+// ************************************************************************************************************                                                                                          
+// End Of I2C Gyroscope/Accelerometer/Compass MPU9250                                                                                                                                                    
+// ************************************************************************************************************                                                                                          
 
 
 #if defined(WMP)
