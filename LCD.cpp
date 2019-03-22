@@ -855,6 +855,8 @@ void initLCD() {
       strcpy_P(line2,PSTR("  QUAD-P"));
     #elif defined(QUADX)
       strcpy_P(line2,PSTR("  QUAD-X"));
+    #elif defined(QUADW)
+      strcpy_P(line2,PSTR("  QUAD-W"));
     #elif defined(BI)
       strcpy_P(line2,PSTR("  BICopter"));
     #elif defined(Y6)

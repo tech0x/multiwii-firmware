@@ -232,7 +232,7 @@
   #define NUMBER_MOTOR     3
   #define PRI_SERVO_FROM   TRI_SERVO // use only servo 6 (or 4 with Mega HW PWM)
   #define PRI_SERVO_TO     TRI_SERVO
-#elif defined(QUADP) || defined(QUADX) || defined(Y4)|| defined(VTAIL4)
+#elif defined(QUADP) || defined(QUADX) || defined(QUADW) || defined(Y4)|| defined(VTAIL4)
   #define NUMBER_MOTOR     4
 #elif defined(Y6) || defined(HEX6) || defined(HEX6X) || defined(HEX6H)
   #define NUMBER_MOTOR     6
@@ -1727,7 +1727,7 @@
   #define MULTITYPE 1
 #elif defined(QUADP)
   #define MULTITYPE 2
-#elif defined(QUADX)
+#elif defined(QUADX) || defined(QUADW)
   #define MULTITYPE 3
 #elif defined(BI)
   #define MULTITYPE 4
